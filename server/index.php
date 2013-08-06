@@ -39,6 +39,7 @@ $app->get('/page', function () use ($app) {
     // Connect to the database and get the next file that doesn't
     // isn't checked out or doesn't have a transcript.
     $db = new PDO('sqlite:' . $config['sqlite3_database_path']);
+    $db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
     $query = $db->prepare("SELECT Id, ImagePath FROM Pages WHERE CheckedOut = 0 AND TranscriptPath = '' LIMIT 1");
     $query->execute();
     $result = $query->fetch();
@@ -47,35 +48,30 @@ $app->get('/page', function () use ($app) {
       // @todo: If we allow multiple file extensions in the config,
       // we need to determine the mimetype dynamically.
       $app->response()->header('Content-Type', 'image/jpeg');
-      $image_path_id = $result['Id'];
       $image_path = $result['ImagePath'];
       readfile($image_path);
+      // Set the current page image's record to be checked out.
+      try {
+        $checked_out_query = $db->prepare("UPDATE Pages SET CheckedOut = 1 WHERE Id = :imagepathid");
+        $checked_out_query->bindParam(':imagepathid', $result['Id'], PDO::PARAM_INT);
+        $checked_out_query->execute();
+      }
+      catch(PDOException $c) {
+        $log = $app->getLog();
+        $log->debug($c->getMessage());
+      }
+      $db = NULL;
     }
     else {
       // Return an HTTP status code of 204, No Content.
       $app->halt(204);
     }
-    $db = NULL;
-  }
-  catch(PDOException $e) {
-    print 'Exception : ' . $e->getMessage();
-  }
-
-  try {
-    $db = new PDO('sqlite:' . $config['sqlite3_database_path']);
-
-    $log = $app->getLog();
-    $log->debug('Image path ID is ' . $image_path_id);
-
-    $query = $db->prepare("UPDATE Pages SET CheckedOut = 1 WHERE Id = :imagepath_id");
-    $query->bindParam(':imagepath_id', $image_path_id);
-    $query->execute();
-    $db = NULL;
   }
   catch(PDOException $e) {
     $log = $app->getLog();
     $log->debug($e->getMessage());
   }
+
 });
 
 /**
@@ -99,9 +95,24 @@ $app->post('/page', function () use ($app) {
   $transcript = strstr($request->getBody(), '&');
   $transcript = ltrim($transcript, '&');
 
-  file_put_contents($config['transcript_base_dir'] . $filename, $transcript);
+  if (file_put_contents($config['transcript_base_dir'] . $filename, $transcript)) {
+  // Update the file's row in the database (checked out = 0, transcript = path to txt)
+    try {
+      // Connect to the database and get the next file that doesn't
+      // isn't checked out or doesn't have a transcript.
+      $db = new PDO('sqlite:' . $config['sqlite3_database_path']);
+      $db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+      //  @todo: Where do we get the row ID?
+      $query = $db->prepare("UPDATE Pages SET CheckedOut = 0, TranscriptPath = :transcriptpath WHERE Id = :imagepathid");
+      $query->bindParam('::transcriptpath', $result['Id'], PDO::PARAM_STR);
+      $query->bindParam(':imagepathid', $result['Id'], PDO::PARAM_INT);
+      $query->execute();
+    }
+    catch {
 
-  // @todo: Update the file's row in the database (checked out = 0, transcript = path to txt)
+    }
+  }
+
 });
 
 $app->run();
