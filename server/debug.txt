@@ -1,0 +1,3 @@
+$log = $app->getLog();
+$log->debug('Non LD browser');
+
