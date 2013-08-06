@@ -39,7 +39,7 @@ $app->get('/page', function () use ($app) {
     // Connect to the database and get the next file that doesn't
     // isn't checked out or doesn't have a transcript.
     $db = new PDO('sqlite:' . $config['sqlite3_database_path']);
-    $query = $db->prepare("SELECT ImagePath FROM Pages WHERE CheckedOut = 0 AND TranscriptPath = '' LIMIT 1");
+    $query = $db->prepare("SELECT Id, ImagePath FROM Pages WHERE CheckedOut = 0 AND TranscriptPath = '' LIMIT 1");
     $query->execute();
     $result = $query->fetch();
     if ($result) {
@@ -47,11 +47,13 @@ $app->get('/page', function () use ($app) {
       // @todo: If we allow multiple file extensions in the config,
       // we need to determine the mimetype dynamically.
       $app->response()->header('Content-Type', 'image/jpeg');
+      $image_path_id = $result['Id'];
       $image_path = $result['ImagePath'];
       readfile($image_path);
     }
     else {
-      // @todo: What do we do if there are no more images?
+      // Return an HTTP status code of 204, No Content.
+      $app->halt(204);
     }
     $db = NULL;
   }
@@ -61,13 +63,18 @@ $app->get('/page', function () use ($app) {
 
   try {
     $db = new PDO('sqlite:' . $config['sqlite3_database_path']);
-    $query = $db->prepare("UPDATE Pages SET CheckedOut = 1 WHERE ImagePath = :imagepath");
-    $query->bindParam(':imagepath', $image_path);
+
+    $log = $app->getLog();
+    $log->debug('Image path ID is ' . $image_path_id);
+
+    $query = $db->prepare("UPDATE Pages SET CheckedOut = 1 WHERE Id = :imagepath_id");
+    $query->bindParam(':imagepath_id', $image_path_id);
     $query->execute();
     $db = NULL;
   }
   catch(PDOException $e) {
-    print 'Exception : ' . $e->getMessage();
+    $log = $app->getLog();
+    $log->debug($e->getMessage());
   }
 });
 
