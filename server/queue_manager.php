@@ -11,7 +11,7 @@ try {
 
   // If the 'purge' paramter was included, delete all rows from the db.
   if (isset($argv[1]) && $argv[1] == 'purge') {
-    $result = $db->query("DELETE FROM 'Pages'");
+    $result = $db->query("DELETE FROM Pages");
     $count = $result->rowCount();
     $db = NULL;
     print "Deleted $count rows from database\n";
