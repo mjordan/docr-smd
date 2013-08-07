@@ -22,14 +22,10 @@ $app = new \Slim\Slim();
 require 'config.php';
 
 /**
- * Route for GET /page. 
+ * Route for GET /page. Sample request: curl -v -o mj.jpg http://thinkpad/docr/server/page
  *
  * @param object $app
  * The global $app object instantiated at the top of this file.
-
- @todo: We will need to add a response header that tells the client what
-   the file name to save is.
-
  */
 $app->get('/page', function () use ($app) {
   global $config;
@@ -49,6 +45,9 @@ $app->get('/page', function () use ($app) {
       // we need to determine the mimetype dynamically.
       $app->response()->header('Content-Type', 'image/jpeg');
       $image_path = $result['ImagePath'];
+      // We send the image path as a header so it can in turn be sent back by the
+      // client in the POST /page request, which will use it as the key in the database update query.
+      $app->response()->header('Content-Disposition', 'inline; filename="' . $image_path . '"');
       readfile($image_path);
       // Set the current page image's record to be checked out.
       try {
@@ -75,8 +74,8 @@ $app->get('/page', function () use ($app) {
 });
 
 /**
- * Route for POST /page. The request body will contain the OCR transcript file plus
- * a 'filename' parameter.
+ * Route for POST /page. The request body will contain the OCR transcript.
+ * Example request: curl -X POST -H 'Content-Disposition: inline; filename="/home/mark/Documents/apache_thinkpad/docr_images/Hutchinson1794-1-0253.jpg"' --data-binary @test.txt http://thinkpad/docr/server/page
  *
  * @param object $app
  * The global $app object instantiated at the top of this file.
@@ -84,32 +83,31 @@ $app->get('/page', function () use ($app) {
 $app->post('/page', function () use ($app) {
   global $config;
   $request = $app->request();
-  // Split the 'filename' parameter from the body, which also contains the
-  // transcript file, e.g.:
-  // filename=bar&Hello from the file.
-  // It's an excellent file.
-  $filename = strstr($request->getBody(), '&', TRUE);
-  $filename = strstr($filename, '=');
-  $filename = ltrim($filename, '=');
   // Get the transcript from the request body.
-  $transcript = strstr($request->getBody(), '&');
-  $transcript = ltrim($transcript, '&');
+  $transcript_contents = $request->getBody();
+ 
+  $request = $app->request();
+  $image_path = getImagePathFromHeader($request->headers('Content-Disposition'));
+  $log = $app->getLog();
+  $log->debug($image_path);
+  $transcript_path = getTranscriptPathFromImagePath($image_path);
+  $log->debug($transcript_path);
 
-  if (file_put_contents($config['transcript_base_dir'] . $filename, $transcript)) {
+  if (file_put_contents($transcript_path, $transcript_contents)) {
   // Update the file's row in the database (checked out = 0, transcript = path to txt)
     try {
       // Connect to the database and get the next file that doesn't
       // isn't checked out or doesn't have a transcript.
       $db = new PDO('sqlite:' . $config['sqlite3_database_path']);
       $db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
-      //  @todo: Where do we get the row ID?
-      $query = $db->prepare("UPDATE Pages SET CheckedOut = 0, TranscriptPath = :transcriptpath WHERE Id = :imagepathid");
-      $query->bindParam('::transcriptpath', $result['Id'], PDO::PARAM_STR);
-      $query->bindParam(':imagepathid', $result['Id'], PDO::PARAM_INT);
+      $query = $db->prepare("UPDATE Pages SET CheckedOut = 0, TranscriptPath = :transcriptpath WHERE ImagePath = :imagepath");
+      $query->bindValue(':transcriptpath', $transcript_path, PDO::PARAM_STR);
+      $query->bindValue(':imagepath', $image_path, PDO::PARAM_STR);
       $query->execute();
     }
-    catch {
-
+    catch(PDOException $e) {
+      $log = $app->getLog();
+      $log->debug($e->getMessage());
     }
   }
 
@@ -120,5 +118,24 @@ $app->run();
 /**
  * Functions.
  */
+
+// Input: inline; filename="/home/mark/Documents/apache_thinkpad/docr_images/Hutchinson1794-1-0253.jpg"
+// Output: /home/mark/Documents/apache_thinkpad/docr_images/Hutchinson1794-1-0253.jpg
+function getImagePathFromHeader($header) {
+  $image_path = preg_replace('/^.+?"/', '', $header);
+  $image_path = trim($image_path, '"');
+  return $image_path;
+}
+
+// Input: /home/mark/Documents/apache_thinkpad/docr_images/Hutchinson1794-1-0253.jpg
+// Output: /tmp/docr_transcripts/Hutchinson1794-1-0253.txt
+function getTranscriptPathFromImagePath($image_path) {
+  global $config;
+  $image_base_path_pattern = '#' . $config['image_base_dir'] . '#';
+  $tmp_path = preg_replace($image_base_path_pattern, $config['transcript_base_dir'], $image_path);
+  $path_parts = pathinfo($tmp_path);
+  $transcript_path = $path_parts['dirname'] . '/' . $path_parts['filename'] . '.txt';
+  return $transcript_path;
+}
 
 ?>
