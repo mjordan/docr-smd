@@ -1,3 +1,3 @@
-# docr/smd
+# docr/smd server
 
 ## Overview
