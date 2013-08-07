@@ -2,6 +2,7 @@
 
 # Sample docr/smd intended to illustrate client/server interaction.
 
+import os 
 import sys
 import requests
 import subprocess
@@ -40,6 +41,10 @@ subprocess.check_call(["/usr/bin/tesseract", "./temp.jpg", "./temp"])
 transcript = open('./temp.txt', 'rb')
 headers = {'Content-Disposition': image_file_path}
 r = requests.post(docr_server, data=transcript, headers=headers)
+
+# Clean up temporary files.
+os.remove("./temp.jpg")
+os.remove("./temp.txt")
 
 # That's it.
 
