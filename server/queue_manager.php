@@ -1,10 +1,23 @@
 <?php
 
+/**
+ * queue_manager.php, a script to load records into the docr/smd queue database,
+ * list items in the database, and purge the database.
+ *
+ * Usage: php queue_manager.php [purge|list]
+ * 
+ * Parameters:
+ * None: If run with no paramters, will load a record into the database for
+ *  each file under $config['image_base_dir'] having extensions defined in
+ *  $config['image_file_extensions'].
+ * purge: Deletes all the records in the database.
+ * list: Lists all records in the database.
+ */
+
 // Get the server application's config settings.
 require 'config.php';
 
-
-// Load the file paths into the database.
+// Default action is to load the file paths into the database.
 try {
   // Connect to the database.
   $db = new PDO('sqlite:' . $config['sqlite3_database_path']);
@@ -30,11 +43,12 @@ try {
 
   $file_paths = getImageFiles($config['image_base_dir']);
 
-  // If the database does not exist, create it.
+  // If the Pages table does not exist, create it.
   $db->exec("CREATE TABLE IF NOT EXISTS Pages (Id INTEGER PRIMARY KEY, ImagePath TEXT, CheckedOut INTEGER, TranscriptPath TEXT)");
 
-  // Insert file path data. First check to see if a file is already registered in the database.
+  // Insert file path data. 
   foreach ($file_paths as $filepath) {
+    // First check to see if a file is already registered in the database.
     $row_check_query = $db->prepare("SELECT ImagePath FROM Pages WHERE ImagePath = :filepath");
     $row_check_query->bindParam(':filepath', $filepath);
     $row_check_query->execute();
@@ -57,15 +71,19 @@ try {
   $db = NULL;
 }
 catch(PDOException $e) {
-  print 'Exception : '.$e->getMessage();
+  print 'Exception : ' . $e->getMessage();
 }
 
 /**
  * Functions.
  */
 
-// Recurse the image base directory and get all file paths for files ending
-// with the extenstions listed in $config['image_file_extensions'].
+/**
+ * Recurse the image base directory and get all file paths for files ending
+ * with the extenstions listed in $config['image_file_extensions'].
+ *
+ * @return string
+ */
 function getImageFiles() {
   global $config;
   $file_paths = array();

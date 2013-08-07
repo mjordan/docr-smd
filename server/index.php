@@ -8,10 +8,6 @@
  * Distributed under the MIT License, http://opensource.org/licenses/MIT.
  */
 
-// /page GET - retrieves a new image file for OCR'ing.
-// /page PUT - adds the text transcript of the image.
-// curl -X POST -d "filename=bar" --data-binary @test.txt http://thinkpad/docr/server/page
-
 // Slim setup.
 require 'lib/Slim/Slim.php';
 \Slim\Slim::registerAutoloader();
@@ -22,7 +18,11 @@ $app = new \Slim\Slim();
 require 'config.php';
 
 /**
- * Route for GET /page. Sample request: curl -v -o mj.jpg http://thinkpad/docr/server/page
+ * Route for GET /page. Sample request: curl -o test.jpg http://thinkpad/docr/server/page
+ * An OCR client would need to get the filename in the Content-Disposition header returned
+ * in the docr/smd response and keep track of it for returning in the POST request containing
+ * the OCR output; the client can save the file locally for processing using whatever name
+ * or path it wants (test.jpg is just an example).
  *
  * @param object $app
  * The global $app object instantiated at the top of this file.
@@ -33,7 +33,7 @@ $app->get('/page', function () use ($app) {
 
   try {
     // Connect to the database and get the next file that doesn't
-    // isn't checked out or doesn't have a transcript.
+    // isn't checked out and doesn't have a transcript.
     $db = new PDO('sqlite:' . $config['sqlite3_database_path']);
     $db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
     $query = $db->prepare("SELECT Id, ImagePath FROM Pages WHERE CheckedOut = 0 AND TranscriptPath = '' LIMIT 1");
@@ -70,7 +70,6 @@ $app->get('/page', function () use ($app) {
     $log = $app->getLog();
     $log->debug($e->getMessage());
   }
-
 });
 
 /**
@@ -78,7 +77,7 @@ $app->get('/page', function () use ($app) {
  * Example request: curl -X POST -H 'Content-Disposition: inline; filename="/home/mark/Documents/apache_thinkpad/docr_images/Hutchinson1794-1-0253.jpg"' --data-binary @test.txt http://thinkpad/docr/server/page
  *
  * @param object $app
- * The global $app object instantiated at the top of this file.
+ *  The global $app object instantiated at the top of this file.
  */
 $app->post('/page', function () use ($app) {
   global $config;
@@ -93,11 +92,16 @@ $app->post('/page', function () use ($app) {
   $transcript_path = getTranscriptPathFromImagePath($image_path);
   $log->debug($transcript_path);
 
+  // Create subdirtories under the transcript base directory if they don't exist.
+  $path_parts = pathinfo($transcript_path);
+  if (!file_exists($path_parts['dirname'])) {
+    mkdir($path_parts['dirname'], 0777, TRUE);
+  }
+
+  // Write out the transcript returned from the client.
   if (file_put_contents($transcript_path, $transcript_contents)) {
-  // Update the file's row in the database (checked out = 0, transcript = path to txt)
+    // Update the file's row in the database (checked out = 0, transcript = path to txt)
     try {
-      // Connect to the database and get the next file that doesn't
-      // isn't checked out or doesn't have a transcript.
       $db = new PDO('sqlite:' . $config['sqlite3_database_path']);
       $db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
       $query = $db->prepare("UPDATE Pages SET CheckedOut = 0, TranscriptPath = :transcriptpath WHERE ImagePath = :imagepath");
@@ -110,27 +114,48 @@ $app->post('/page', function () use ($app) {
       $log->debug($e->getMessage());
     }
   }
-
 });
 
+// Run the Slim app.
 $app->run();
 
 /**
  * Functions.
  */
 
-// Input: inline; filename="/home/mark/Documents/apache_thinkpad/docr_images/Hutchinson1794-1-0253.jpg"
-// Output: /home/mark/Documents/apache_thinkpad/docr_images/Hutchinson1794-1-0253.jpg
+/**
+ * Extracts a full filepath from the Content-Dispostion header sent by the
+ * client in the POST /page request.
+ *
+ * @param string $header
+ *  The raw Content-Disposition HTTP request header. For example:
+ *  inline; filename="/home/mark/Documents/apache_thinkpad/docr_images/Hutchinson1794-1-0253.jpg"
+ *
+ * @return string
+ *  The full path to the image being processed. For example:
+ * /home/mark/Documents/apache_thinkpad/docr_images/Hutchinson1794-1-0253.jpg
+ */
 function getImagePathFromHeader($header) {
   $image_path = preg_replace('/^.+?"/', '', $header);
   $image_path = trim($image_path, '"');
   return $image_path;
 }
 
-// Input: /home/mark/Documents/apache_thinkpad/docr_images/Hutchinson1794-1-0253.jpg
-// Output: /tmp/docr_transcripts/Hutchinson1794-1-0253.txt
+/**
+ * Creates a path to a transcript from a image path.
+ *
+ * @param string $image_path
+ *  The full path to the image being processed. For example:
+ *  /home/mark/Documents/apache_thinkpad/docr_images/Hutchinson1794-1-0253.jpg
+ *
+ * @return string
+ *  The full path to the transcript file corresponding to the image. For example:
+ *  /tmp/docr_transcripts/Hutchinson1794-1-0253.txt
+ */
 function getTranscriptPathFromImagePath($image_path) {
   global $config;
+  // Replace the image base directory configuration value with the
+  // transcript base directory configuration value.
   $image_base_path_pattern = '#' . $config['image_base_dir'] . '#';
   $tmp_path = preg_replace($image_base_path_pattern, $config['transcript_base_dir'], $image_path);
   $path_parts = pathinfo($tmp_path);
