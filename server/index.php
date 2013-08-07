@@ -114,6 +114,11 @@ $app->post('/page', function () use ($app) {
       $log->debug($e->getMessage());
     }
   }
+  // If the config option to delete the image is set to TRUE, do so.
+  // @todo: Remove the images directory if it is empty.
+  if ($config['delete_images']) {
+    unlink($image_path);
+  }
 });
 
 // Run the Slim app.
@@ -159,7 +164,7 @@ function getTranscriptPathFromImagePath($image_path) {
   $image_base_path_pattern = '#' . $config['image_base_dir'] . '#';
   $tmp_path = preg_replace($image_base_path_pattern, $config['transcript_base_dir'], $image_path);
   $path_parts = pathinfo($tmp_path);
-  $transcript_path = $path_parts['dirname'] . '/' . $path_parts['filename'] . '.txt';
+  $transcript_path = $path_parts['dirname'] . DIRECTORY_SEPARATOR . $path_parts['filename'] . '.txt';
   return $transcript_path;
 }
 
