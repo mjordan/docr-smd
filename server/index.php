@@ -45,10 +45,17 @@ $app->get('/page', function () use ($app) {
       // we need to determine the mimetype dynamically.
       $app->response()->header('Content-Type', 'image/jpeg');
       $image_path = $result['ImagePath'];
-      // We send the image path as a header so it can in turn be sent back by the
-      // client in the POST /page request, which will use it as the key in the database update query.
-      $app->response()->header('Content-Disposition', 'inline; filename="' . $image_path . '"');
-      readfile($image_path);
+      // Check to see if file exists and if it doesn't, return a 204.
+      if (file_exists($image_path)) {
+        // We send the image path as a header so it can in turn be sent back by the
+        // client in the POST /page request, which will use it as the key in the database update query.
+        $app->response()->header('Content-Disposition', 'inline; filename="' . $image_path . '"');
+        readfile($image_path);
+      }
+      else {
+        // Return an HTTP status code of 204, No Content.
+        $app->halt(204);
+      }
       // Set the current page image's record to be checked out.
       try {
         $checked_out_query = $db->prepare("UPDATE Pages SET CheckedOut = 1 WHERE Id = :imagepathid");
