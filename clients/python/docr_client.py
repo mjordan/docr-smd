@@ -23,7 +23,7 @@ if r.status_code == 200:
   i = Image.open(StringIO(r.content))
   i.save('temp.jpg')
 else:
-  print "Sorry, docr page server at %s is reporting a '%d' response." % (docr_server, r.status_code)
+  print "Sorry, docr page server at %s is reporting a '%d' response (%s)." % (docr_server, r.status_code, r.reason)
   sys.exit()
 
 # If we've made it this far, get the Content-Disposition header 
