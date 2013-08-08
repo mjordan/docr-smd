@@ -15,4 +15,21 @@ $config = array(
   // updated the queue database with the path to the transcript file.
   'delete_images' => FALSE,
 );
+
+/**
+ * Mime types for common image formats. If you are processing formats
+ * not in this list, add them.
+ */
+$image_mime_types = array(
+  'bmp' => 'image/x-ms-bmp',
+  'gif' => 'image/gif',
+  'jpg' => 'image/jpeg',
+  'jpeg' => 'image/jpeg',
+  'jp2' => 'image/jp2',
+  'pcx' => 'image/pcx',
+  'png' => 'image/png',
+  'psd' => 'image/x-photoshop',
+  'tif' => 'image/tiff',
+  'tiff' => 'image/tiff',
+);
   

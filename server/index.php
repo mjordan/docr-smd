@@ -29,6 +29,7 @@ require 'config.php';
  */
 $app->get('/page', function () use ($app) {
   global $config;
+  global $image_mime_types;
   $request = $app->request();
 
   try {
@@ -40,10 +41,9 @@ $app->get('/page', function () use ($app) {
     $query->execute();
     $result = $query->fetch();
     if ($result) {
-      // image/jpeg
-      // @todo: If we allow multiple file extensions in the config,
-      // we need to determine the mimetype dynamically.
-      $app->response()->header('Content-Type', 'image/jpeg');
+      // Get the mime type for the image from the $image_mime_types array.
+      $image_extension = pathinfo($result['ImagePath'], PATHINFO_EXTENSION);
+      $app->response()->header('Content-Type', $image_mime_types[$image_extension]);
       $image_path = $result['ImagePath'];
       // Check to see if file exists and if it doesn't, return a 204.
       if (file_exists($image_path)) {
