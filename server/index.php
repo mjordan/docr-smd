@@ -8,14 +8,33 @@
  * Distributed under the MIT License, http://opensource.org/licenses/MIT.
  */
 
+// Get the plugin config file and provide a default value for
+// $plugins if the file cannot be loaded.
+require 'config.php';
+
 // Slim setup.
 require 'lib/Slim/Slim.php';
 \Slim\Slim::registerAutoloader();
 $app = new \Slim\Slim();
 
-// Get the plugin config file and provide a default value for
-// $plugins if the file cannot be loaded.
-require 'config.php';
+/**
+ * Slim hook that fires before every request.
+ *
+ * If $tokens is not empty, all clients must send an X-Auth-Key
+ * request header containing a valid key.
+ *
+ * @param object $app
+ * The global $app object instantiated at the top of this file.
+ */
+$app->hook('slim.before', function () use ($app) {
+  global $tokens;
+  if (count($tokens)) {
+    $request = $app->request();
+    if (!in_array($request->headers('X-Auth-Key'), $tokens)) {
+      $app->halt(403);
+    }
+  }
+});
 
 /**
  * Route for GET /page. Sample request: curl -o test.jpg http://thinkpad/docr/server/page

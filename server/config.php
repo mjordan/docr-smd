@@ -17,6 +17,13 @@ $config = array(
 );
 
 /**
+ * List of token strings that authorize clients to access this docr server.
+ * Leave empty if you don't want to restrict access. Clients must send the
+ * X-Auth-Key request header containing a key from this list.
+ */
+$tokens = array();
+
+/**
  * Mime types for common image formats. If you are processing formats
  * not in this list, add them.
  */

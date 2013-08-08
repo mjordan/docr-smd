@@ -10,16 +10,20 @@ from PIL import Image
 from StringIO import StringIO
 
 docr_server = 'http://thinkpad/docr/server/page'
+# A key is required only if the docr server is configured to use them.
+rest_key = ''
 
 # Get an image and save it to disk for processing.
-r = requests.get(docr_server)
+headers = {'X-Auth-Key': rest_key}
+r = requests.get(docr_server, headers=headers)
 # If the docr page server doesn't have any images left,
 # it returns a 204 No Content response code.
-if r.status_code != 204:
+# if r.status_code != 204:
+if r.status_code == 200:
   i = Image.open(StringIO(r.content))
   i.save('temp.jpg')
 else:
-  print "Sorry, docr page server at %s is reporting 'No content'" % docr_server
+  print "Sorry, docr page server at %s is reporting a '%d' response." % (docr_server, r.status_code)
   sys.exit()
 
 # If we've made it this far, get the Content-Disposition header 
@@ -39,6 +43,7 @@ subprocess.check_call(["/usr/bin/tesseract", "./temp.jpg", "./temp"])
 # as the request body and also include a Content-Disposition header
 # containing image_file_path.
 transcript = open('./temp.txt', 'rb')
+headers = {'X-Auth-Key': rest_key}
 headers = {'Content-Disposition': image_file_path}
 r = requests.post(docr_server, data=transcript, headers=headers)
 
