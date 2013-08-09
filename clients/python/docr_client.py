@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 # Sample docr/smd intended to illustrate client/server interaction.
+# Usage: ./docr_client.py http://some.docr.server/page
 
 import os 
 import sys
@@ -9,6 +10,12 @@ import subprocess
 from PIL import Image
 from StringIO import StringIO
 
+# Bail if no docr server URL was provided.
+if (len(sys.argv) < 2):
+  print "Sorry, you need to provide the URL to a docr server"
+  sys.exit()
+
+# If we've made it this far, grab the docr server URL from the command line.
 docr_server = sys.argv[1]
 # A key is required only if the docr server is configured to use them.
 rest_key = ''
@@ -16,27 +23,29 @@ rest_key = ''
 # Get an image and save it to disk for processing.
 headers = {'X-Auth-Key': rest_key}
 r = requests.get(docr_server, headers=headers)
+
 # If the docr page server doesn't have any images left,
 # it returns a 204 No Content response code.
-# if r.status_code != 204:
 if r.status_code == 200:
   i = Image.open(StringIO(r.content))
   i.save('temp.jpg')
 else:
-  print "Sorry, docr page server at %s is reporting a '%d' response (%s)." % (docr_server, r.status_code, r.reason)
+  print "Sorry, docr page server at %s is reporting a '%d' response (%s)." \
+    % (docr_server, r.status_code, r.reason)
   sys.exit()
 
 # If we've made it this far, get the Content-Disposition header 
 # from the docr page server so we can send it back to the server
 # with the OCR transcript.
 image_file_path = r.headers['Content-Disposition']
+
 # Get the docr server's URL. This may be different than the value used
 # above, if the client was redirected.
 docr_server = r.headers['X-docr-Server-URL']
+
 # Remove 'inline; filename=' from beginning of Content-Disposition value.
 image_file_path = image_file_path[17:]
 image_file_path = image_file_path.strip('"')
-print image_file_path
 
 # Run the image through Tesseract.
 subprocess.check_call(["/usr/bin/tesseract", "./temp.jpg", "./temp"])

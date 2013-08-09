@@ -34,6 +34,12 @@ $app->hook('slim.before', function () use ($app) {
       $app->halt(403);
     }
   }
+
+  // @todo: Add check for 'network/cluster/grid' (let's keep 'swarm' out of it)
+  // mode here and if it is TRUE, issue a $app->response()->redirect($someotherdocrserver, 303)?
+  // $app->response()->redirect('http://www.lib.sfu.ca', 303);
+  // $app->stop();
+
 });
 
 /**
