@@ -62,12 +62,20 @@ $app->get('/page', function () use ($app) {
     if ($result) {
       // Get the mime type for the image from the $image_mime_types array.
       $image_extension = pathinfo($result['ImagePath'], PATHINFO_EXTENSION);
-      $app->response()->header('Content-Type', $image_mime_types[$image_extension]);
       $image_path = $result['ImagePath'];
+      $app->response()->header('Content-Type', $image_mime_types[$image_extension]);
+      // Get the docr server's URL so we can pass it back to the client.
+      // Otherwise, the client won't know what server to POST the transcript
+      // to if it redirected to a server in swarm mode.
+      $env = $app->environment();
+      $docr_server_url = $env['slim.url_scheme'] . '://' . $env['SERVER_NAME'] . $env['SCRIPT_NAME'] . $env['PATH_INFO'];
+      $app->response()->header('X-docr-Server-URL', $docr_server_url);
       // Check to see if file exists and if it doesn't, return a 204.
       if (file_exists($image_path)) {
         // We send the image path as a header so it can in turn be sent back by the
         // client in the POST /page request, which will use it as the key in the database update query.
+        $log = $app->getLog();
+        $log->debug($image_path);
         $app->response()->header('Content-Disposition', 'inline; filename="' . $image_path . '"');
         readfile($image_path);
       }

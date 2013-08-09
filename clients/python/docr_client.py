@@ -9,7 +9,7 @@ import subprocess
 from PIL import Image
 from StringIO import StringIO
 
-docr_server = 'http://thinkpad/docr/server/page'
+docr_server = sys.argv[1]
 # A key is required only if the docr server is configured to use them.
 rest_key = ''
 
@@ -30,6 +30,9 @@ else:
 # from the docr page server so we can send it back to the server
 # with the OCR transcript.
 image_file_path = r.headers['Content-Disposition']
+# Get the docr server's URL. This may be different than the value used
+# above, if the client was redirected.
+docr_server = r.headers['X-docr-Server-URL']
 # Remove 'inline; filename=' from beginning of Content-Disposition value.
 image_file_path = image_file_path[17:]
 image_file_path = image_file_path.strip('"')
