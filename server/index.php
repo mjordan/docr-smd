@@ -34,12 +34,7 @@ $app->hook('slim.before', function () use ($app) {
       $app->halt(403);
     }
   }
-
-  // @todo: Add check for 'network/cluster/grid' (let's keep 'swarm' out of it)
-  // mode here and if it is TRUE, issue a $app->response()->redirect($someotherdocrserver, 303)?
-  // $app->response()->redirect('http://www.lib.sfu.ca', 303);
-  // $app->stop();
-
+  // @todo: Check if client is in IP whitelist.
 });
 
 /**
@@ -86,6 +81,9 @@ $app->get('/page', function () use ($app) {
         readfile($image_path);
       }
       else {
+        // @todo: Add check for 'peer mode' here and if it is TRUE, issue 
+        // a $app->response()->redirect($someotherdocrserver, 303)
+        // $app->stop();
         // Return an HTTP status code of 204, No Content.
         $app->halt(204);
       }
@@ -102,6 +100,7 @@ $app->get('/page', function () use ($app) {
       $db = NULL;
     }
     else {
+      // @todo: Add redirect to peers.
       // Return an HTTP status code of 204, No Content.
       $app->halt(204);
     }
