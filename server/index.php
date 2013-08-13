@@ -20,21 +20,32 @@ $app = new \Slim\Slim();
 /**
  * Slim hook that fires before every request.
  *
- * If $tokens is not empty, all clients must send an X-Auth-Key
- * request header containing a valid key.
  *
  * @param object $app
  * The global $app object instantiated at the top of this file.
  */
 $app->hook('slim.before', function () use ($app) {
   global $tokens;
+  global $allowed_ip_addresses;
+  $request = $app->request();
+  // Checks to see if client API token is in registered list. If
+  // $tokens is not empty, all clients must send an X-Auth-Key
+  // request header containing a valid key.
   if (count($tokens)) {
-    $request = $app->request();
     if (!in_array($request->headers('X-Auth-Key'), $tokens)) {
       $app->halt(403);
     }
   }
-  // @todo: Check if client is in IP whitelist.
+  // Check if client is in IP whitelist. If $allowed_ip_addresses
+  // is not empty, all client IP addresses must match a regex
+  // defined in that array.
+  if (count($allowed_ip_addresses)) {
+    foreach ($allowed_ip_addresses as $range) {
+      if (!preg_match($range, $request->getIp())) {
+        $app->halt(403);
+      }
+    }
+  }
 });
 
 /**
@@ -131,7 +142,7 @@ $app->post('/page', function () use ($app) {
   $transcript_path = getTranscriptPathFromImagePath($image_path);
   $log->debug($transcript_path);
 
-  // Create subdirtories under the transcript base directory if they don't exist.
+  // Create subdirectories under the transcript base directory if they don't exist.
   $path_parts = pathinfo($transcript_path);
   if (!file_exists($path_parts['dirname'])) {
     mkdir($path_parts['dirname'], 0777, TRUE);

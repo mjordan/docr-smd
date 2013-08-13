@@ -24,6 +24,14 @@ $config = array(
 $tokens = array();
 
 /**
+ * List of regexes matching client IP addresses allowed to access this docr
+ * server. Leave empty if you don't want to restrict access by IP address.
+ */
+$allowed_ip_addresses = array(
+  // '/^123\.243\.(\d+)\.(\d+)/', // For range 123.243.0.0 - 123.243.255.255
+);
+
+/**
  * Mime types for common image formats. If you are processing formats
  * not in this list, add them.
  */
