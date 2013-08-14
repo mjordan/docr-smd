@@ -88,8 +88,6 @@ $app->get('/page', function () use ($app) {
       if (file_exists($image_path)) {
         // We send the image path as a header so it can in turn be sent back by the
         // client in the POST /page request, which will use it as the key in the database update query.
-        $log = $app->getLog();
-        $log->debug($image_path);
         $app->response()->header('Content-Disposition', 'inline; filename="' . $image_path . '"');
         readfile($image_path);
       }
@@ -133,10 +131,7 @@ $app->post('/page', function () use ($app) {
  
   $request = $app->request();
   $image_path = getImagePathFromHeader($request->headers('Content-Disposition'));
-  $log = $app->getLog();
-  $log->debug($image_path);
   $transcript_path = getTranscriptPathFromImagePath($image_path);
-  $log->debug($transcript_path);
 
   // Create subdirectories under the transcript base directory if they don't exist.
   $path_parts = pathinfo($transcript_path);
