@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 # Sample docr/smd intended to illustrate client/server interaction.
+# and to assist in testing the page server.
+#
 # Usage: ./docr_client.py http://some.docr.server/page
 
 import os 
@@ -24,8 +26,8 @@ rest_key = ''
 headers = {'X-Auth-Key': rest_key}
 r = requests.get(docr_server, headers=headers)
 
-# If the docr page server doesn't have any images left,
-# it returns a 204 No Content response code.
+# If the docr page server doesn't have any images left, it returns
+# a 204 No Content response code.
 if r.status_code == 200:
   i = Image.open(StringIO(r.content))
   i.save('temp.jpg')
