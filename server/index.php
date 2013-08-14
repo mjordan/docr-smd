@@ -60,6 +60,7 @@ $app->hook('slim.before', function () use ($app) {
  */
 $app->get('/page', function () use ($app) {
   global $config;
+  global $peers;
   global $image_mime_types;
   $request = $app->request();
 
@@ -82,7 +83,8 @@ $app->get('/page', function () use ($app) {
       $env = $app->environment();
       $docr_server_url = $env['slim.url_scheme'] . '://' . $env['SERVER_NAME'] . $env['SCRIPT_NAME'] . $env['PATH_INFO'];
       $app->response()->header('X-docr-Server-URL', $docr_server_url);
-      // Check to see if file exists and if it doesn't, return a 204.
+      // Check to see if file exists and if it doesn't, check for peers to redirect
+      // the client to.
       if (file_exists($image_path)) {
         // We send the image path as a header so it can in turn be sent back by the
         // client in the POST /page request, which will use it as the key in the database update query.
@@ -92,11 +94,7 @@ $app->get('/page', function () use ($app) {
         readfile($image_path);
       }
       else {
-        // @todo: Add check for 'peer mode' here and if it is TRUE, issue 
-        // a $app->response()->redirect($someotherdocrserver, 303)
-        // $app->stop();
-        // Return an HTTP status code of 204, No Content.
-        $app->halt(204);
+        handleNoContent($app, $peers);
       }
       // Set the current page image's record to be checked out.
       try {
@@ -111,9 +109,7 @@ $app->get('/page', function () use ($app) {
       $db = NULL;
     }
     else {
-      // @todo: Add redirect to peers.
-      // Return an HTTP status code of 204, No Content.
-      $app->halt(204);
+      handleNoContent($app, $peers);
     }
   }
   catch(PDOException $e) {
@@ -177,6 +173,23 @@ $app->run();
 /**
  * Functions.
  */
+
+/**
+ * If there are no more images in the queue, check for peer mode.
+ * If there are no peers, return an HTTP 204, No Content response.
+ *
+ */
+function handleNoContent($app, $peers) {
+  if (count($peers)) {
+    $random_peer = array_rand($peers);
+    $app->response()->redirect($peers[$random_peer], 303);
+    $app->stop();
+  }
+  else {
+    // If there are no peers, return a 204, No Content.
+    $app->halt(204);
+  }
+}
 
 /**
  * Extracts a full filepath from the Content-Dispostion header sent by the

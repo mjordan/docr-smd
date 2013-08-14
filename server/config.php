@@ -39,6 +39,20 @@ $allowed_ip_addresses = array(
 );
 
 /**
+ * List of peers. Each member is the fully qualified URL to another 
+ * docr page server. If your own server does not have any more images
+ * to process, the client's request will be redirected to a random entry
+ * from this list. 
+ *
+ * Note that each docr page server's IP and token authentication applies
+ * to redirected client requests.
+ */
+$peers = array(
+  // 'http://foo.example.edu/docr/server/page',
+  // 'http://baz.sample.ca/services/docr/server/page',
+);
+
+/**
  * File extension => mime type mapping for common image formats. 
  * If you are processing formats not in this list, add them.
  */
