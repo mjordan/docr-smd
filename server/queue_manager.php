@@ -5,6 +5,8 @@
  * list items in the database, and purge the database.
  *
  * Usage: php queue_manager.php [load|purge|purgeall|list]
+ *
+ * Distributed under the MIT License, http://opensource.org/licenses/MIT.
  */
 
 // Get the server application's config settings.

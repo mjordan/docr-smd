@@ -3,7 +3,13 @@
 # Sample docr/smd intended to illustrate client/server interaction.
 # and to assist in testing the page server.
 #
+# docr/smd page server. https://github.com/mjordan/docr-smd.
+#
+# Copyright 2013 Mark Jordan.
+#
 # Usage: ./docr_client.py http://some.docr.server/page
+#
+# Distributed under the MIT License, http://opensource.org/licenses/MIT.
 
 import os 
 import sys
