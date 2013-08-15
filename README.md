@@ -18,11 +18,11 @@ docr/smd has a 'peer' mode that redirects client requests to other page servers 
 
 The details of the client/server interaction are as follows:
 
-1) The docr/smd client issues a GET request to the server
-2) The server 'checks out' the next image in its queue for OCRing and returns it to the client
-3) The server also sends the image's filesystem path, which is used later as a key to update the docr page queue.
-4) The client performs OCR on image, and sends transcript back to the page server, also sending a header containing the original image's filesysmtem path.
-5) The server saves the OCR transcript to disk, and updates the queue database with the location of the transcript.
+1. The docr/smd client issues a GET request to the server
+2. The server 'checks out' the next image in its queue for OCRing and returns it to the client
+3. The server also sends the image's filesystem path, which is used later as a key to update the docr page queue.
+4. The client performs OCR on image, and sends transcript back to the page server, also sending a header containing the original image's filesysmtem path.
+5. The server saves the OCR transcript to disk, and updates the queue database with the location of the transcript.
 
 ## Deployment
 
