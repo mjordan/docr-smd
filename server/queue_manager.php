@@ -6,6 +6,8 @@
  *
  * Usage: php queue_manager.php [load|purge|purgeall|list]
  *
+ * Copyright 2013 Mark Jordan.
+ *
  * Distributed under the MIT License, http://opensource.org/licenses/MIT.
  */
 

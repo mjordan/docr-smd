@@ -5,9 +5,9 @@
 #
 # docr/smd page server. https://github.com/mjordan/docr-smd.
 #
-# Copyright 2013 Mark Jordan.
-#
 # Usage: ./docr_client.py http://some.docr.server/page
+#
+# Copyright 2013 Mark Jordan.
 #
 # Distributed under the MIT License, http://opensource.org/licenses/MIT.
 

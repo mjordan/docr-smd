@@ -5,6 +5,8 @@
  *
  * Written in the Slim micro-framework, slimframework.com.
  * 
+ * Copyright 2013 Mark Jordan.
+ *
  * Distributed under the MIT License, http://opensource.org/licenses/MIT.
  */
 
