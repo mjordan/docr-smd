@@ -8,7 +8,7 @@ The power of docr/smd is that is can respond to requests from many clients in a 
 
 ## Technical architecture
 
-The docr/smd server maintains a queue of page images that need to be OCRed. Clients periodically query the page server's REST interface for page images, perform the OCR, and POST the resulting transcript back to the server. The server is a simple PHP application that uses SQLite to maintain its page queue. 
+The docr/smd server maintains a queue of page images that need to be OCRed. Clients periodically query the page server's REST interface for page images, perform the OCR, and POST the resulting transcript back to the server. The server is a simple PHP application that uses SQLite to maintain its page queue. Client requests and the server's responses make heavy use of HTTP headers to supplement the REST API.
 
 The page queue is loaded and purged by a PHP script called the queue manager, which can be run as a command-line script or as a cron job. It provides options to load the queue, list items in the queue, and purge the queue.
 
