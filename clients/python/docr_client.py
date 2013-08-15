@@ -18,6 +18,9 @@ import subprocess
 from PIL import Image
 from StringIO import StringIO
 
+# Path to the OCR engine executable.
+ocr_engine = "/usr/bin/tesseract"
+
 # Bail if no docr server URL was provided.
 if (len(sys.argv) < 2):
   print "Sorry, you need to provide the URL to a docr server"
@@ -56,7 +59,7 @@ image_file_path = image_file_path[17:]
 image_file_path = image_file_path.strip('"')
 
 # Run the image through Tesseract.
-subprocess.check_call(["/usr/bin/tesseract", "./temp.jpg", "./temp"])
+subprocess.check_call([ocr_engine, "./temp.jpg", "./temp"])
 
 # Now that we have an OCR transcript file (temp.txt), issue a POST
 # request back to the docr server. We include the transcript file
