@@ -17,6 +17,6 @@ The REST endpoint for page image requests is GET /page. The endpoint for returni
 
 ## Maintaining the docr/smd queue
 
-The queue manager populates the queue, lists items in the queue, and purges the queue of items that have transcripts. A typical workflow for maintaining the queue is to copy image files into the image base directory, run 'php queue_manager.php load', wait until clients have performed their work, and run 'queue_manager.php purge'. You can configure the server to delete page images after they are processed, so all you need to do is make sure that new images are being added to the queue.
+The queue manager populates the queue, lists items in the queue, and purges the queue of items that have transcripts. A typical workflow for maintaining the queue is to copy image files into the image base directory, run 'php queue_manager.php load', wait until clients have performed their work, and run 'queue_manager.php purge'. All of these tasks can be performed manually or by a timed job. You can configure the server to delete page images after they are processed, so all you need to do is make sure that new images are being added to the queue.
 
 

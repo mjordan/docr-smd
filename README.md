@@ -21,7 +21,7 @@ The details of the client/server interaction are as follows:
 1. The docr/smd client issues a GET request to the server.
 2. The server 'checks out' (flags that the image is currently being processed) the next image in its queue for OCRing and returns it to the client.
 3. The server also sends the image's filesystem path to the client, which is used later as a key to update the docr page queue.
-4. The client performs OCR on image, and sends transcript back to the page server; it also sending a header containing the original image's filesysmtem path.
+4. The client performs OCR on image, and sends transcript back to the page server via a POST; it also sending a header containing the original image's filesysmtem path.
 5. The server saves the OCR transcript to disk, updates the queue database with the location of the transcript, and, optionally, deletes the original image file.
 
 ## Deployment
