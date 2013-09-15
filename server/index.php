@@ -53,7 +53,7 @@ $app->hook('slim.before', function () use ($app) {
 /**
  * Route for GET /page. Sample request: curl -o test.jpg http://thinkpad/docr/server/page
  * An OCR client would need to get the filename in the Content-Disposition header returned
- * in the docr/smd response and keep track of it for returning in the POST request containing
+ * in the docr/smd response and keep track of it for returning in the PUT request containing
  * the OCR output; the client can save the file locally for processing using whatever name
  * or path it wants (test.jpg is just an example).
  *
@@ -80,7 +80,7 @@ $app->get('/page', function () use ($app) {
       $image_path = $result['ImagePath'];
       $app->response()->header('Content-Type', $image_mime_types[$image_extension]);
       // Get the docr server's URL so we can pass it back to the client.
-      // Otherwise, the client won't know what server to POST the transcript
+      // Otherwise, the client won't know what server to PUT the transcript
       // to if it redirected to a server in swarm mode.
       $env = $app->environment();
       $docr_server_url = $env['slim.url_scheme'] . '://' . $env['SERVER_NAME'] . $env['SCRIPT_NAME'] . $env['PATH_INFO'];
@@ -89,7 +89,7 @@ $app->get('/page', function () use ($app) {
       // the client to.
       if (file_exists($image_path)) {
         // We send the image path as a header so it can in turn be sent back by the
-        // client in the POST /page request, which will use it as the key in the database update query.
+        // client in the PUT /page request, which will use it as the key in the database update query.
         $app->response()->header('Content-Disposition', 'inline; filename="' . $image_path . '"');
         readfile($image_path);
       }
@@ -119,13 +119,13 @@ $app->get('/page', function () use ($app) {
 });
 
 /**
- * Route for POST /page. The request body will contain the OCR transcript.
- * Example request: curl -X POST -H 'Content-Disposition: inline; filename="/home/mark/Documents/apache_thinkpad/docr_images/Hutchinson1794-1-0253.jpg"' --data-binary @test.txt http://thinkpad/docr/server/page
+ * Route for PUT /page. The request body will contain the OCR transcript.
+ * Example request: curl -X PUT -H 'Content-Disposition: inline; filename="/home/mark/Documents/apache_thinkpad/docr_images/Hutchinson1794-1-0253.jpg"' --data-binary @test.txt http://thinkpad/docr/server/page
  *
  * @param object $app
  *  The global $app object instantiated at the top of this file.
  */
-$app->post('/page', function () use ($app) {
+$app->put('/page', function () use ($app) {
   global $config;
   $request = $app->request();
   // Get the transcript from the request body.
@@ -190,7 +190,7 @@ function handleNoContent($app, $peers) {
 
 /**
  * Extracts a full filepath from the Content-Dispostion header sent by the
- * client in the POST /page request.
+ * client in the PUT /page request.
  *
  * @param string $header
  *  The raw Content-Disposition HTTP request header. For example:

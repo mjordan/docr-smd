@@ -8,7 +8,7 @@ The power of docr/smd is that is can respond to requests from many clients in a 
 
 ## Technical architecture
 
-The docr/smd server maintains a queue of page images that need to be OCRed. Clients periodically query the page server's REST interface for page images, perform the OCR, and POST the resulting transcript back to the server. The server is a simple PHP application that uses SQLite to maintain its page queue. Client requests and the server's responses make heavy use of HTTP headers to supplement the REST API.
+The docr/smd server maintains a queue of page images that need to be OCRed. Clients periodically query the page server's REST interface for page images, perform the OCR, and PUT the resulting transcript back to the server. The server is a simple PHP application that uses SQLite to maintain its page queue. Client requests and the server's responses make heavy use of HTTP headers to supplement the REST API.
 
 The page queue is loaded and purged by a PHP script called the queue manager, which can be run as a command-line script or as a cron job. It provides options to load the queue, list items in the queue, and purge the queue.
 
@@ -21,7 +21,7 @@ The details of the client/server interaction are as follows:
 1. The docr/smd client issues a GET request to the server.
 2. The server 'checks out' (flags that the image is currently being processed) the next image in its queue for OCRing and returns it to the client.
 3. The server also sends the image's filesystem path to the client, which is used later as a key to update the docr page queue.
-4. The client performs OCR on image, and sends transcript back to the page server via a POST; it also sending a header containing the original image's filesysmtem path.
+4. The client performs OCR on image, and sends transcript back to the page server via a PUT; it also sending a header containing the original image's filesysmtem path.
 5. The server saves the OCR transcript to disk, updates the queue database with the location of the transcript, and, optionally, deletes the original image file.
 
 ## Deployment

@@ -4,7 +4,7 @@
 
 The docr/smd page server provides a simple REST API that 1) allows docr clients to request page images and 2) receives the output of the OCR process, i.e., text transcripts of the page images. It is written in the Slim PHP Microframework (http://www.slimframework.com/) and is easy to install and configure. The only requirements on the server side are PHP 5.3.0 and SQLite 3 (and of course, PHP must be configured to connec to SQLite).
 
-The REST endpoint for page image requests is GET /page. The endpoint for returning text transcript files is POST /page.
+The REST endpoint for page image requests is GET /page. The endpoint for returning text transcript files is PUT /page.
 
 ## Setup
 

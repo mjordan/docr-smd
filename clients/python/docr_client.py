@@ -61,14 +61,14 @@ image_file_path = image_file_path.strip('"')
 # Run the image through Tesseract.
 subprocess.check_call([ocr_engine, "./temp.jpg", "./temp"])
 
-# Now that we have an OCR transcript file (temp.txt), issue a POST
+# Now that we have an OCR transcript file (temp.txt), issue a PUT
 # request back to the docr server. We include the transcript file
 # as the request body and also include a Content-Disposition header
 # containing image_file_path.
 transcript = open('./temp.txt', 'rb')
 headers = {'X-Auth-Key': rest_key}
 headers = {'Content-Disposition': image_file_path}
-r = requests.post(docr_server, data=transcript, headers=headers)
+r = requests.put(docr_server, data=transcript, headers=headers)
 
 # Clean up temporary files.
 os.remove("./temp.jpg")
