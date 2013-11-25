@@ -89,8 +89,10 @@ $app->get('/page', function () use ($app) {
       // the client to.
       if (file_exists($image_path)) {
         // We send the image path as a header so it can in turn be sent back by the
-        // client in the PUT /page request, which will use it as the key in the database update query.
+        // client in the PUT /page request, which will use it as the key in the database
+        // update query.
         $app->response()->header('Content-Disposition', 'inline; filename="' . $image_path . '"');
+        // Send the image file to the client.
         readfile($image_path);
       }
       else {

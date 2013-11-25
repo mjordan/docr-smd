@@ -12,7 +12,7 @@ $config = array(
   // is writable by both the user that runs queue_manager.php and the web 
   // server's user.
   'sqlite3_database_path' => '/tmp/docr.sqlite',
-  'image_base_dir' => '/home/mark/Documents/apache_thinkpad/docr_images/',
+  'image_base_dir' => '/tmp/docr_images/',
   // A |-spearated list of extensions for the page image files you want to OCR.
   'image_file_extensions' => 'jpg|tif',
   'transcript_base_dir' => '/tmp/docr_transcripts/',
