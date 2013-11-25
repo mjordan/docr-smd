@@ -26,7 +26,7 @@ The details of the client/server interaction are as follows:
 
 ## Deployment
 
-The docr/ocr server is easy to install and configure. The only requirements on the server are PHP 5.3 and SQLite. Apache will need to have mod_rewrite enabled and 'AllowOverride All' configured for the directory that the docr/smd server will be running in. Local settings such as paths to page image and transcript directories, access control via IP whitelisting and client API tokens, and URLs of peer servers are configured in a single file, config.php.
+The docr/ocr server is easy to install and configure. The only requirements on the server are PHP 5.3 and SQLite (make sure the sqlite driver is enabled in PHP). Also, Apache will need to have mod_rewrite enabled and 'AllowOverride All' configured for the directory that the docr/smd server will be running in. Local settings such as paths to page image and transcript directories, access control via IP whitelisting and client API tokens, and URLs of peer servers are configured in a single file, config.php.
 
 Details on installing and configuring the page server are provided in the README.md file in the 'server' directory. The Python client requires that the Tesseract OCR engine (https://code.google.com/p/tesseract-ocr/) and the Python requests (http://www.python-requests.org/) library be installed.
 
