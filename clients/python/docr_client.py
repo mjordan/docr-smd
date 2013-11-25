@@ -38,8 +38,12 @@ r = requests.get(docr_server, headers=headers)
 # If the docr page server doesn't have any images left, it returns
 # a 204 No Content response code.
 if r.status_code == 200:
-  i = Image.open(StringIO(r.content))
-  i.save('temp.jpg')
+  if os.path.isfile('temp.jpg'):
+    i = Image.open(StringIO(r.content))
+    i.save('temp.jpg')
+  else:
+    print "Sorry, 'temp.jpg' doesn't appear to be a file. Please make sure the docr server is configured properly."
+    sys.exit()
 else:
   print "Sorry, docr page server at %s is reporting a '%d' response (%s)." \
     % (docr_server, r.status_code, r.reason)
