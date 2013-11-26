@@ -28,6 +28,13 @@ EOU;
   print $usage . "\n";
 }
 
+// Most common error is that the SQLite database is not writable
+// by the user running this script.
+if (!is_writable($config['sqlite3_database_path'])) {
+  print "Sorry, the SQLite database at " . $config['sqlite3_database_path'] . " does not appear to be writable.\n";
+  exit;
+}
+
 try {
   // Connect to the database.
   $db = new PDO('sqlite:' . $config['sqlite3_database_path']);
