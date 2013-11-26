@@ -31,3 +31,12 @@ The docr/ocr server is easy to install and configure. The only requirements on t
 Details on installing and configuring the page server are provided in the README.md file in the 'server' directory. The Python client requires that the Tesseract OCR engine (https://code.google.com/p/tesseract-ocr/) and the Python requests (http://www.python-requests.org/) library be installed.
 
 Details on deploying the queue manager are provided in the server/README.md file.
+
+## Troubleshooting
+
+File permissions, especially on the SQLite database, are the most common problem you will encounter. It must be writable by apache's user and also by the user running the queue manager script.
+
+Some specific problems and possible fixes:
+
+* Symptom: "could not find driver" appears in Apache's error log. Possible cause: PHP doesn't have the pdo_sqlite extension installed and enabled.
+
