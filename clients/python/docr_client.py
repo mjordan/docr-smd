@@ -38,11 +38,14 @@ r = requests.get(docr_server, headers=headers)
 # If the docr page server doesn't have any images left, it returns
 # a 204 No Content response code.
 if r.status_code == 200:
-  if os.path.isfile('temp.jpg'):
+  try:
     i = Image.open(StringIO(r.content))
     i.save('temp.jpg')
-  else:
-    print "Sorry, 'temp.jpg' doesn't appear to be a file. Please make sure the docr server is configured properly."
+  except IOError as e:
+    print "Sorry, the docr client has experienced an I/O error({0}): {1}".format(e.errno, e.strerror)
+    sys.exit()
+  except:
+    print "Sorry, the docr client has experienced an unexpected error:", sys.exc_info()[0]
     sys.exit()
 else:
   print "Sorry, docr page server at %s is reporting a '%d' response (%s)." \

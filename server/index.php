@@ -92,8 +92,9 @@ $app->get('/page', function () use ($app) {
         // client in the PUT /page request, which will use it as the key in the database
         // update query.
         $app->response()->header('Content-Disposition', 'inline; filename="' . $image_path . '"');
-        // Send the image file to the client.
-        readfile($image_path);
+        // Send the image file to the client. We collect the file's size in case
+        // we want to use it in debugging.
+        $file_size = readfile($image_path);
       }
       else {
         handleNoContent($app, $peers);
