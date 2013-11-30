@@ -28,9 +28,15 @@ EOU;
   print $usage . "\n";
 }
 
-// Most common error is that the SQLite database is not writable
-// by the user running this script.
-if (!is_writable($config['sqlite3_database_path'])) {
+
+// Most common error is that the SQLite database, or the directory it is in, 
+// is not writable by the user running this script.
+if (!file_exists($config['sqlite3_database_path']) || !is_writable(dirname($config['sqlite3_database_path']))) {
+  print "Sorry, the directory where the SQLite database is located (". dirname($config['sqlite3_database_path']). ") either doesn't exist or is not writable.\n";
+  exit;
+}
+// Now check to see if the SQLite file itself is writable.
+if (file_exists($config['sqlite3_database_path']) && !is_writable($config['sqlite3_database_path'])) {
   print "Sorry, the SQLite database at " . $config['sqlite3_database_path'] . " does not appear to be writable.\n";
   exit;
 }
@@ -116,6 +122,11 @@ catch(PDOException $e) {
  */
 function getImageFiles() {
   global $config;
+  // Check to see if the image directory exists.
+  if (!file_exists($config['image_base_dir'])) {
+    print "Sorry, the image directory (" . $config['image_base_dir'] . ") does not appear to exist.\n";
+    exit;
+  }
   $file_paths = array();
   $iterator = new RecursiveDirectoryIterator($config['image_base_dir']);
   foreach (new RecursiveIteratorIterator($iterator) as $filepath => $fileinfo) {
