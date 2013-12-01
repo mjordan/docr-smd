@@ -34,9 +34,14 @@ Details on deploying the queue manager are provided in the server/README.md file
 
 ## Troubleshooting
 
-File permissions, especially on the SQLite database, are the most common problem you will encounter. It must be writable by apache's user and also by the user running the queue manager script. One common symptom that you should check the permissions on the database file is that the Python client will fail with the error "Sorry, the docr client has experienced an I/O error(None): None."
+File permissions, especially on the SQLite database, are the most common problem you will encounter. It must be writable by apache's user and also by the user running the queue manager script. Common symptoms of bad permissions on the database file include:
+
+* the Python client will fail with the error "Sorry, the docr client has experienced an I/O error(None): None."
+* output from the OCR engine is showing up in the $config['transcript_base_dir'] directory, but the paths to the files are not in the database when you issue a 'queue_manager.php list' command.
+
+Also, make sure that the web server's user can write to the directory defined in $config['transcript_base_dir'].
 
 Some specific problems and possible fixes:
 
-* Symptom: "could not find driver" appears in Apache's error log. Possible cause: PHP doesn't have the pdo_sqlite extension installed and enabled.
+* Symptom: "could not find driver" appears 1) in Apache's error log or 2) on the command line when you run the queue manager. Possible cause: PHP doesn't have the pdo_sqlite extension installed and enabled.
 
