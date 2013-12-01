@@ -34,7 +34,7 @@ Details on deploying the queue manager are provided in the server/README.md file
 
 ## Troubleshooting
 
-File permissions, especially on the SQLite database, are the most common problem you will encounter. It must be writable by apache's user and also by the user running the queue manager script.
+File permissions, especially on the SQLite database, are the most common problem you will encounter. It must be writable by apache's user and also by the user running the queue manager script. One common symptom that you should check the permissions on the database file is that the Python client will fail with the error "Sorry, the docr client has experienced an I/O error(None): None."
 
 Some specific problems and possible fixes:
 

@@ -31,7 +31,7 @@ EOU;
 
 // Most common error is that the SQLite database, or the directory it is in, 
 // is not writable by the user running this script.
-if (!file_exists($config['sqlite3_database_path']) || !is_writable(dirname($config['sqlite3_database_path']))) {
+if (!is_writable(dirname($config['sqlite3_database_path']))) {
   print "Sorry, the directory where the SQLite database is located (". dirname($config['sqlite3_database_path']). ") either doesn't exist or is not writable.\n";
   exit;
 }
