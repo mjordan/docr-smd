@@ -38,6 +38,7 @@ r = requests.get(docr_server, headers=headers)
 # If the docr page server doesn't have any images left, it returns
 # a 204 No Content response code.
 if r.status_code == 204:
+  print "Sorry, the docr page server has no more images to process." 
   sys.exit()
 
 # If the docr page server returns a 200, try to save the image.
